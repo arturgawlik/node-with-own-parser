@@ -1,0 +1,32 @@
+import { createServer } from "node:http";
+
+createServer(async (req, res) => {
+  const { body, url } = await parse(req);
+
+  console.log(body);
+  console.log(url.searchParams);
+
+  res.end();
+}).listen(8080, () => console.log("http://localhost:8080"));
+
+async function parse(req) {
+  let bodyRaw = "";
+  let body = null;
+  let url = new URL(`http://localhost:8080${req.url}`);
+
+  for await (const chunk of req) {
+    bodyRaw += chunk;
+  }
+
+  if (req.headers["content-type"] === "application/json") {
+    body = JSON.parse(bodyRaw);
+  } else {
+    body = bodyRaw;
+  }
+
+  return {
+    bodyRaw,
+    body,
+    url,
+  };
+}
